@@ -1,0 +1,52 @@
+import os
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import torch
+import sentence_transformers
+
+sentence_transformers.SentenceTransformer._target_device = "cpu"  
+
+model = SentenceTransformer('all-MiniLM-L6-v2', device="cpu")  
+
+assignments = {
+    "student1.txt": "The quick brown fox jumps over the lazy dog.",
+    "student2.txt": "A fast brown fox jumps over a sleeping dog.",
+    "student3.txt": "The quick brown fox jumps over the lazy dog."
+}
+
+texts = list(assignments.values())
+embeddings = model.encode(texts, convert_to_tensor=True)
+
+cosine_sim = cosine_similarity(embeddings.cpu().numpy()) 
+
+def highlight_similar_parts(text1, text2):
+    seq_matcher = difflib.SequenceMatcher(None, text1, text2)
+    highlighted_text1, highlighted_text2 = "", ""
+
+    for op, i1, i2, j1, j2 in seq_matcher.get_opcodes():
+        if op == 'equal':  
+            highlighted_text1 += f"\033[92m{text1[i1:i2]}\033[0m"  # Green highlight
+            highlighted_text2 += f"\033[92m{text2[j1:j2]}\033[0m"  # Green highlight
+        else:
+            highlighted_text1 += text1[i1:i2]
+            highlighted_text2 += text2[j1:j2]
+
+    return highlighted_text1, highlighted_text2
+
+
+students = list(assignments.keys())
+print("\nPlagiarism Report:")
+for i in range(len(students)):
+    for j in range(i + 1, len(students)):
+        similarity = cosine_sim[i][j]
+        if similarity > 0.7:  # Threshold for plagiarism
+            print(f"Possible Plagiarism Detected between {students[i]} and {students[j]}")
+            print(f"   - Similarity Score: {similarity:.2f}")
+
+            # Highlight Similar Parts
+            text1, text2 = texts[i], texts[j]
+            highlighted1, highlighted2 = highlight_similar_parts(text1, text2)
+
+            print(f"   -> {students[i]}: {highlighted1}")
+            print(f"   -> {students[j]}: {highlighted2}\n")
