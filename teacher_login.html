@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f8f9; /* Blue Background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #ADD8E6; /* Light Blue Box */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Floating Effect */
+      width: 320px;
+      transition: transform 0.3s ease-in-out;
+    }
+    .container:hover {
+      transform: translateY(-10px); /* Floating on Hover */
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    input[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      font-size: 16px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+    input[type="submit"]:hover {
+      background-color: #007B9E;
+      transform: scale(1.05);
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <h1>Teacher Login</h1>
+    <form id="teacherLoginForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <input type="submit" value="Login">
+    </form>
+  </div>
+
+  <script>
+    document.querySelector("#teacherLoginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      const response = await fetch("http://localhost:5000/api/teachers/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        window.location.href = "teacher_dashboard.html"; // Redirect on success
+      } else {
+        const result = await response.text();
+        alert(result);
+      }
+    });
+  </script>
+</body>
+</html>

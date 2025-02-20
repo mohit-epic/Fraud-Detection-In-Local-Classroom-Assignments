@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .container {
+      display: flex;
+      padding: 20px;
+    }
+    .sidebar {
+      width: 250px;
+      background: #fff;
+      padding: 15px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .sidebar h2 {
+      text-align: center;
+    }
+    .sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .sidebar ul li {
+      padding: 10px;
+      margin-bottom: 5px;
+      background-color: #ddd;
+      cursor: pointer;
+      border-radius: 5px;
+      position: relative;
+    }
+    .sidebar ul li:hover {
+      background-color: #ccc;
+    }
+    .dropdown {
+      display: none;
+      list-style: none;
+      padding: 0;
+      margin: 5px 0 0;
+      background: #eee;
+      border-radius: 5px;
+      position: relative;
+    }
+    .dropdown li {
+      padding: 8px;
+      margin: 2px 0;
+      cursor: pointer;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .dropdown li:hover {
+      background: #ddd;
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+      background: white;
+      margin-left: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .profile-section, .notifications {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #eef;
+    }
+    .logout-btn {
+      background-color: red;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .logout-btn:hover {
+      background-color: darkred;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">Student Dashboard</div>
+
+  <div class="container">
+    <!-- Sidebar with Subjects -->
+    <div class="sidebar">
+      <h2>Subjects</h2>
+      <ul>
+        <li onclick="toggleDropdown('math')">Mathematics
+          <ul class="dropdown" id="math">
+            <li onclick="loadContent('Mathematics', 'Assignments')">Assignments</li>
+            <li onclick="loadContent('Mathematics', 'Tests')">Tests</li>
+            <li onclick="loadContent('Mathematics', 'Course Materials')">Course Materials</li>
+          </ul>
+        </li>
+        <li onclick="toggleDropdown('physics')">Physics
+          <ul class="dropdown" id="physics">
+            <li onclick="loadContent('Physics', 'Assignments')">Assignments</li>
+            <li onclick="loadContent('Physics', 'Tests')">Tests</li>
+            <li onclick="loadContent('Physics', 'Course Materials')">Course Materials</li>
+          </ul>
+        </li>
+        <li onclick="toggleDropdown('chemistry')">Chemistry
+          <ul class="dropdown" id="chemistry">
+            <li onclick="loadContent('Chemistry', 'Assignments')">Assignments</li>
+            <li onclick="loadContent('Chemistry', 'Tests')">Tests</li>
+            <li onclick="loadContent('Chemistry', 'Course Materials')">Course Materials</li>
+          </ul>
+        </li>
+      </ul>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content">
+      <div class="profile-section">
+        <h2>Profile</h2>
+        <p><strong>Student Name:</strong> <span id="studentName"></span></p>
+        <p><strong>Email:</strong> <span id="studentEmail"></span></p>
+      </div>
+
+      <div class="notifications">
+        <h2>Notifications</h2>
+        <p>No new notifications</p>
+      </div>
+
+      <div id="subject-content">
+        <h2>Select a Subject</h2>
+        <p>Click on a subject from the sidebar to view assignments, tests, and course materials.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("studentUsername");
+      const email = localStorage.getItem("studentEmail");
+      if (!username || !email) {
+        alert("User not logged in");
+        window.location.href = "student_login_form.html";
+        return;
+      }
+      document.getElementById("studentName").textContent = username;
+      document.getElementById("studentEmail").textContent = email;
+    });
+
+    function toggleDropdown(subjectId) {
+      document.querySelectorAll(".dropdown").forEach(dropdown => {
+        if (dropdown.id !== subjectId) {
+          dropdown.style.display = "none";
+        }
+      });
+      const dropdown = document.getElementById(subjectId);
+      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    function loadContent(subject, type) {
+      localStorage.setItem("selectedSubject", subject);
+      if (type === "Assignments") {
+        document.getElementById("subject-content").innerHTML = `<iframe src="assignments.html" style="width:100%; height:500px; border:none;"></iframe>`;
+      } else {
+        document.getElementById("subject-content").innerHTML = `
+          <h2>${subject} - ${type}</h2>
+          <p>Content for ${type} in ${subject} will be displayed here.</p>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("studentUsername");
+      localStorage.removeItem("studentEmail");
+      window.location.href = "student_login_form.html";
+    }
+  </script>
+
+</body>
+</html>

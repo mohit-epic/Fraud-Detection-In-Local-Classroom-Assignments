@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login/Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #c7c9cc; /* Blue Background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #ADD8E6; /* Light Blue Box */
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Floating Effect */
+      text-align: center;
+      transition: transform 0.3s ease-in-out;
+    }
+    .container:hover {
+      transform: translateY(-10px); /* Hover Effect for Floating */
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .btn {
+      padding: 12px 24px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease-in-out;
+    }
+    .btn-login {
+      background-color: #0056b3;
+      color: white;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+    .btn-register {
+      background-color: #0056b3;
+      color: white;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+    .btn:hover {
+      background-color: #003d80;
+      transform: scale(1.05);
+    }
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <h1>Student</h1>
+    <button class="btn btn-login" onclick="redirectToStudentLogin()">Login</button>
+    <button class="btn btn-register" onclick="redirectToStudentRegister()">Register</button>
+  </div>
+
+  <script>
+    function redirectToStudentLogin() {
+      // Redirect to the student login page
+      window.location.href = "student_login_form.html";
+    }
+
+    function redirectToStudentRegister() {
+      // Redirect to the student registration page
+      window.location.href = "student_register.html";
+    }
+  </script>
+</body>
+</html>
