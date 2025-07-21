@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chemistry Assignments - Student</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #f9f9f9;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    button {
+      padding: 8px 12px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chemistry Assignments</h1>
+  <div class="container">
+    <ul id="assignmentList"><p>Loading...</p></ul>
+  </div>
+
+  <script>
+    const API_BASE_URL = "http://localhost:5000/api";
+
+    async function fetchAssignments() {
+      const response = await fetch(`${API_BASE_URL}/assignments/chemistry`);
+      const assignments = await response.json();
+      const assignmentList = document.getElementById("assignmentList");
+      assignmentList.innerHTML = "";
+      if (assignments.length === 0) {
+        assignmentList.innerHTML = "<p>No assignments posted</p>";
+        return;
+      }
+      assignments.reverse().forEach(assignment => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <strong>${assignment.title}</strong>
+          <p>${assignment.description}</p>
+          <p>Deadline: ${new Date(assignment.deadline).toLocaleDateString()}</p>
+          <input type="file" id="file-${assignment._id}">
+          <button onclick="uploadAssignment('${assignment._id}')">Upload</button>
+        `;
+        assignmentList.appendChild(li);
+      });
+    }
+
+    async function uploadAssignment(assignmentId) {
+      const fileInput = document.getElementById(`file-${assignmentId}`);
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select a file to upload");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("studentUsername", localStorage.getItem("studentUsername"));
+
+      await fetch(`${API_BASE_URL}/assignments/chemistry/submit/${assignmentId}`, {
+        method: "POST",
+        body: formData
+      });
+      alert("Assignment uploaded successfully!");
+      fileInput.value = ""; // Clear the input
+    }
+
+    fetchAssignments();
+  </script>
+</body>
+</html>

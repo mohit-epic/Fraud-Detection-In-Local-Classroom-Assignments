@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plagiarism Checker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #007bff;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .upload-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .upload-btn:hover {
+            background: #0056b3;
+        }
+        .result-section {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        .result-box {
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px;
+        }
+        .low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .high {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .document {
+            text-align: left;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+        .document p {
+            margin: 0 0 10px;
+        }
+        .maybe {
+            background-color: yellow;
+        }
+        .high-prob {
+            background-color: red;
+            color: white;
+        }
+        .inconsistent {
+            background-color: lightblue;
+        }
+        .metadata {
+            margin: 20px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            text-align: left;
+            max-width: 800px;
+        }
+        .metadata h3 {
+            margin-top: 0;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plagiarism Checker</h1>
+    <div class="container">
+        <div class="upload-area">
+            <h3>Upload Student Assignment</h3>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="file" id="assignmentFile" accept=".txt,.docx" required>
+                <button type="submit" class="upload-btn">Check Plagiarism</button>
+            </form>
+        </div>
+        <div class="result-section" id="resultSection">
+            <h2>Plagiarism Detection Results</h2>
+            <div id="tfidfResult" class="result-box"></div>
+            <br>
+            <div id="deepResult" class="result-box"></div>
+            <div id="warning" class="error"></div>
+            <div class="metadata" id="metadata"></div>
+            <h3>Submitted Document with Highlights</h3>
+            <div class="document" id="document"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = document.getElementById('assignmentFile').files[0];
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                const resultSection = document.getElementById('resultSection');
+                resultSection.style.display = 'block';
+
+                if (result.success) {
+                    // Display similarity scores
+                    const tfidfScore = result.analysis.tfidf_score.toFixed(2);
+                    const deepScore = result.analysis.deep_score.toFixed(2);
+                    highlightResult(tfidfScore, 'tfidfResult', `TF-IDF Similarity Score: ${tfidfScore}%`);
+                    highlightResult(deepScore, 'deepResult', `Deep Learning Similarity Score: ${deepScore}%`);
+
+                    // Warning for inconsistencies
+                    const inconsistentCount = result.analysis.inconsistent_paragraphs.length;
+                    if (inconsistentCount > 0) {
+                        document.getElementById('warning').innerText = 
+                            `Warning: Potential writing style inconsistencies detected in ${inconsistentCount} paragraph(s).`;
+                    } else {
+                        document.getElementById('warning').innerText = '';
+                    }
+
+                    // Metadata
+                    const metadata = result.analysis.metadata;
+                    document.getElementById('metadata').innerHTML = `
+                        <h3>Submission Metadata</h3>
+                        <p><strong>File Size:</strong> ${metadata.file_size} bytes</p>
+                        <p><strong>Word Count:</strong> ${metadata.word_count}</p>
+                        <p><strong>Submission Time:</strong> ${metadata.submission_time}</p>
+                    `;
+
+                    // Display document with highlights
+                    const docElement = document.getElementById('document');
+                    const paragraphs = result.analysis.paragraphs;
+                    docElement.innerHTML = paragraphs.map(para => `<p>${escapeHtml(para)}</p>`).join('');
+                    highlightDocument(result.analysis.matches);
+                    highlightInconsistent(result.analysis.inconsistent_paragraphs);
+                } else {
+                    document.getElementById('warning').innerText = `Error: ${result.message}`;
+                    document.getElementById('tfidfResult').innerText = '';
+                    document.getElementById('deepResult').innerText = '';
+                    document.getElementById('metadata').innerHTML = '';
+                    document.getElementById('document').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                document.getElementById('resultSection').style.display = 'block';
+                document.getElementById('warning').innerText = 'An error occurred during upload.';
+            }
+        });
+
+        function highlightResult(score, elementId, text) {
+            const element = document.getElementById(elementId);
+            element.innerText = text;
+            const value = parseFloat(score);
+            if (value < 40) element.classList.add('low');
+            else if (value >= 40 && value < 75) element.classList.add('medium');
+            else {
+                element.classList.add('high');
+                alert("⚠️ High plagiarism detected! Please revise your work.");
+            }
+        }
+
+        function highlightDocument(matches) {
+            const docElement = document.getElementById('document');
+            let paragraphs = docElement.getElementsByTagName('p');
+            matches.forEach(match => {
+                const similarity = match.similarity;
+                const sentence = match.sentence;
+                const className = similarity >= 75 ? 'high-prob' : 'maybe';
+                for (let para of paragraphs) {
+                    if (para.innerText.includes(sentence)) {
+                        let text = para.innerHTML;
+                        const escapedSentence = escapeHtml(sentence);
+                        const highlighted = `<span class="${className}">${escapedSentence}</span>`;
+                        para.innerHTML = text.replace(escapedSentence, highlighted);
+                    }
+                }
+            });
+        }
+
+        function highlightInconsistent(inconsistentIndices) {
+            const paragraphs = document.getElementById('document').getElementsByTagName('p');
+            inconsistentIndices.forEach(index => {
+                if (paragraphs[index]) paragraphs[index].classList.add('inconsistent');
+            });
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

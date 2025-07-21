@@ -1,0 +1,8 @@
+<h2>Flagged Assignments</h2>
+<ul>
+    {% for report in reports %}
+        <li>{{ report.filename }} - {{ report.similarity }}% (Matches: {{ report.matched_file }})
+        <a href="/compare/{{ report.filename }}/{{ report.matched_file }}">View Comparison</a>
+        </li>
+    {% endfor %}
+</ul>

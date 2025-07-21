@@ -1,0 +1,6 @@
+projectKey=PlagiarismDetector
+serverUrl=http://localhost:9000
+serverVersion=25.3.0.104237
+dashboardUrl=http://localhost:9000/dashboard?id=PlagiarismDetector
+ceTaskId=a03ba945-6af8-4326-affc-88b0f621e1be
+ceTaskUrl=http://localhost:9000/api/ce/task?id=a03ba945-6af8-4326-affc-88b0f621e1be
