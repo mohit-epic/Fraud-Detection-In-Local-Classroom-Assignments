@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Student Requests</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .request-info {
+            flex: 1;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .approve-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background: #218838;
+        }
+
+        .reject-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .reject-btn:hover {
+            background: #c82333;
+        }
+
+        .debug {
+            color: red;
+            font-size: 12px;
+            display: none; /* Hidden by default */
+        }
+
+        .debug-toggle {
+            margin: 10px 0;
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .debug-toggle:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Approve Student Requests</h1>
+    <div class="container">
+        <button class="debug-toggle" onclick="toggleDebugLog()">Show Debug Log</button>
+        <ul id="requestList"><p>Loading...</p></ul>
+        <div id="debugLog" class="debug"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:5000/api";
+
+        // Function to log debug messages
+        function logDebug(message) {
+            const debugLog = document.getElementById("debugLog");
+            debugLog.innerHTML += `${new Date().toLocaleTimeString()} - ${message}<br>`;
+            console.log(message);
+        }
+
+        // Toggle debug log visibility
+        function toggleDebugLog() {
+            const debugLog = document.getElementById("debugLog");
+            const toggleButton = document.querySelector(".debug-toggle");
+            if (debugLog.style.display === "none") {
+                debugLog.style.display = "block";
+                toggleButton.textContent = "Hide Debug Log";
+            } else {
+                debugLog.style.display = "none";
+                toggleButton.textContent = "Show Debug Log";
+            }
+        }
+
+        // Fetch pending student requests
+        async function fetchStudentRequests() {
+            try {
+                logDebug("Fetching student requests...");
+                const response = await fetch(`${API_BASE_URL}/students/requests`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const requests = await response.json();
+                logDebug(`Fetched student requests: ${JSON.stringify(requests)}`);
+
+                const requestList = document.getElementById("requestList");
+                requestList.innerHTML = "";
+                if (requests.length === 0) {
+                    logDebug("No pending requests found");
+                    requestList.innerHTML = "<p>No pending student requests</p>";
+                    return;
+                }
+
+                requests.forEach(request => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `
+                        <div class="request-info">
+                            <strong>${request.username}</strong><br>
+                            Email: ${request.email}
+                        </div>
+                        <div class="request-actions">
+                            <button class="approve-btn" onclick="approveRequest('${request._id}')">Approve</button>
+                            <button class="reject-btn" onclick="rejectRequest('${request._id}')">Reject</button>
+                        </div>
+                    `;
+                    requestList.appendChild(li);
+                });
+                logDebug("Rendered all student requests");
+            } catch (error) {
+                logDebug(`Error fetching student requests: ${error.message}`);
+                const requestList = document.getElementById("requestList");
+                requestList.innerHTML = "<p>Error loading requests</p>";
+            }
+        }
+
+        // Approve a student request
+        async function approveRequest(requestId) {
+            try {
+                logDebug(`Approving request with ID: ${requestId}`);
+                const response = await fetch(`${API_BASE_URL}/students/approve`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: requestId }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    logDebug("Student request approved successfully");
+                    alert("Student approved!");
+                    fetchStudentRequests(); // Refresh the list
+                } else {
+                    logDebug(`Failed to approve request: ${result.message}`);
+                    alert(`Failed to approve: ${result.message}`);
+                }
+            } catch (error) {
+                logDebug(`Error approving request: ${error.message}`);
+                alert("Error approving request");
+            }
+        }
+
+        // Reject a student request
+        async function rejectRequest(requestId) {
+            try {
+                logDebug(`Rejecting request with ID: ${requestId}`);
+                const response = await fetch(`${API_BASE_URL}/students/reject`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: requestId }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    logDebug("Student request rejected successfully");
+                    alert("Student request rejected!");
+                    fetchStudentRequests(); // Refresh the list
+                } else {
+                    logDebug(`Failed to reject request: ${result.message}`);
+                    alert(`Failed to reject: ${result.message}`);
+                }
+            } catch (error) {
+                logDebug(`Error rejecting request: ${error.message}`);
+                alert("Error rejecting request");
+            }
+        }
+
+        // Initial fetch of student requests
+        fetchStudentRequests();
+    </script>
+</body>
+</html>

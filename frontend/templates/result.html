@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plagiarism Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .result-box {
+            padding: 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .high {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .document {
+            text-align: left;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+        .document p {
+            margin: 0 0 10px;
+        }
+        .maybe {
+            background-color: yellow;
+        }
+        .high-prob {
+            background-color: red;
+            color: white;
+        }
+        .inconsistent {
+            background-color: lightblue;
+        }
+        .metadata {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            text-align: left;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .metadata h3 {
+            margin-top: 0;
+        }
+        .compare-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .compare-document {
+            width: 45%;
+        }
+        .suspicious {
+            color: red;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .compare-container {
+                flex-direction: column;
+            }
+            .compare-document {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if mode == 'single' %}
+            <h2>Plagiarism Detection Results</h2>
+
+            <div id="tfidf_result" class="result-box">TF-IDF Similarity Score: {{ tfidf_score }}</div>
+            <br>
+            <div id="deep_result" class="result-box">Deep Learning Similarity Score: {{ deep_score }}</div>
+
+            {% if inconsistent|select|list|length > 0 %}
+                <p style="color: red;">Warning: Potential writing style inconsistencies detected.</p>
+            {% endif %}
+
+            <div class="metadata">
+                <h3>Submission Metadata</h3>
+                <p><strong>File Size:</strong> {{ metadata.file_size }} bytes</p>
+                <p><strong>Word Count:</strong> {{ metadata.word_count }}</p>
+                <p><strong>Submission Time:</strong> {{ metadata.submission_time }}</p>
+            </div>
+
+            <h3>Submitted Document with Highlights</h3>
+            <div class="document" id="document">
+                {% for para in paragraphs %}
+                    <p>{{ para | safe }}</p>
+                {% endfor %}
+            </div>
+        {% elif mode == 'compare' %}
+            <h2>Comparison Results between {{ assignment1 }} and {{ assignment2 }}</h2>
+
+            <div id="compare_tfidf_result" class="result-box">TF-IDF Similarity Score: {{ tfidf_score }}</div>
+            <br>
+            <div id="compare_deep_result" class="result-box">Deep Learning Similarity Score: {{ deep_score }}</div>
+
+            <!-- Metadata Comparison Section -->
+            <div class="metadata">
+                <h3>Metadata Comparison</h3>
+                <div class="compare-container">
+                    <div class="compare-document">
+                        <h4>{{ assignment1 }}</h4>
+                        <p><strong>File Size:</strong> {{ metadata1.file_size }} bytes</p>
+                        <p><strong>Word Count:</strong> {{ metadata1.word_count }}</p>
+                        <p><strong>Submission Time:</strong> {{ metadata1.submission_time }}</p>
+                    </div>
+                    <div class="compare-document">
+                        <h4>{{ assignment2 }}</h4>
+                        <p><strong>File Size:</strong> {{ metadata2.file_size }} bytes</p>
+                        <p><strong>Word Count:</strong> {{ metadata2.word_count }}</p>
+                        <p><strong>Submission Time:</strong> {{ metadata2.submission_time }}</p>
+                    </div>
+                </div>
+                <h4>Differences</h4>
+                <p><strong>Time Difference:</strong> {{ metadata_diff.time_diff }}
+                    {% if metadata_diff.time_suspicious %}
+                        <span class="suspicious">(Suspiciously close!)</span>
+                    {% endif %}
+                </p>
+                <p><strong>Word Count Difference:</strong> {{ metadata_diff.word_count_diff }}</p>
+                <p><strong>File Size Difference:</strong> {{ metadata_diff.file_size_diff }} bytes</p>
+            </div>
+
+            <div class="compare-container">
+                <div class="compare-document">
+                    <h3>Assignment 1: {{ assignment1 }}</h3>
+                    <div class="document" id="document1">
+                        {% for para in paragraphs1 %}
+                            <p>{{ para | safe }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="compare-document">
+                    <h3>Assignment 2: {{ assignment2 }}</h3>
+                    <div class="document" id="document2">
+                        {% for para in paragraphs2 %}
+                            <p>{{ para | safe }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function highlightResult(score, elementId) {
+            let element = document.getElementById(elementId);
+            let value = parseFloat(score.replace('%', ''));
+            
+            if (value < 40) {
+                element.classList.add('low');
+            } else if (value >= 40 && value < 75) {
+                element.classList.add('medium');
+            } else {
+                element.classList.add('high');
+                alert("⚠️ High plagiarism detected! Please revise your work.");
+            }
+        }
+
+        function highlightDocument(matchesData) {
+            let docElement = document.getElementById("document");
+            let text = docElement.innerHTML;
+
+            matchesData.forEach(match => {
+                let similarity = match.similarity;
+                let sentence = match.sentence
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+                let className = (similarity >= 75) ? "high-prob" : "maybe";
+                let highlighted = `<span class="${className}">${sentence}</span>`;
+                text = text.replace(sentence, highlighted);
+            });
+
+            docElement.innerHTML = text;
+        }
+
+        function highlightSentences(docElement, sentences, className) {
+            let text = docElement.innerHTML;
+            sentences.forEach(sentence => {
+                let escapedSentence = sentence.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                let highlighted = `<span class="${className}">${escapedSentence}</span>`;
+                text = text.replace(escapedSentence, highlighted);
+            });
+            docElement.innerHTML = text;
+        }
+
+        {% if mode == 'single' %}
+            highlightResult("{{ tfidf_score }}", "tfidf_result");
+            highlightResult("{{ deep_score }}", "deep_result");
+
+            let inconsistentData = "{{ inconsistent | tojson | safe }}";
+            inconsistentData = JSON.parse(inconsistentData);
+            let paragraphs = document.querySelectorAll("#document p");
+            inconsistentData.forEach((isInconsistent, index) => {
+                if (isInconsistent) {
+                    paragraphs[index].classList.add("inconsistent");
+                }
+            });
+
+            let plagiarismMatches = JSON.parse('{{ matches | tojson | safe }}');
+            highlightDocument(plagiarismMatches);
+        {% else %}
+            highlightResult("{{ tfidf_score }}", "compare_tfidf_result");
+            highlightResult("{{ deep_score }}", "compare_deep_result");
+
+            let matchesInText1 = JSON.parse('{{ matches_in_text1 | tojson | safe }}');
+            let matchesInText2 = JSON.parse('{{ matches_in_text2 | tojson | safe }}');
+            let doc1 = document.getElementById("document1");
+            let doc2 = document.getElementById("document2");
+            highlightSentences(doc1, matchesInText1, "high-prob");
+            highlightSentences(doc2, matchesInText2, "high-prob");
+        {% endif %}
+    </script>
+</body>
+</html>

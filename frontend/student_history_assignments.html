@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - Maths Assignments</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif; /* Modern, clean font */
+            margin: 0;
+            padding: 40px; /* Increased padding for better spacing */
+            background: linear-gradient(135deg, #1e1e2f 0%, #3b3b58 100%); /* Deep blue-gray gradient */
+            color: #e0e0e0; /* Light gray for text contrast */
+            min-height: 100vh;
+            line-height: 1.6; /* Improved readability */
+        }
+    
+        h1 {
+            text-align: center;
+            color: #ffffff; /* White for prominence */
+            font-size: 2.8rem; /* Slightly larger */
+            font-weight: 600; /* Bold but not overly heavy */
+            margin-bottom: 40px; /* More space below */
+            text-transform: uppercase;
+            letter-spacing: 2px; /* Wider spacing for elegance */
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Deeper shadow for depth */
+        }
+    
+        /* Container */
+        .container {
+            max-width: 1000px; /* Slightly wider for larger screens */
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1); /* Glassmorphism effect */
+            backdrop-filter: blur(10px); /* Subtle blur for modern look */
+            padding: 35px;
+            border-radius: 20px; /* Softer, modern corners */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Light border */
+            transition: all 0.3s ease;
+        }
+    
+        .container:hover {
+            transform: translateY(-8px); /* More pronounced lift */
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25); /* Enhanced shadow */
+        }
+    
+        /* List Styles */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+    
+        li {
+            background: rgba(255, 255, 255, 0.05); /* Subtle background */
+            margin: 20px 0; /* Increased spacing */
+            padding: 25px; /* More internal space */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            border-left: 6px solid #00b4d8; /* Cyan accent */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+    
+        li:hover {
+            transform: translateX(8px); /* More noticeable shift */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+            background: rgba(255, 255, 255, 0.08); /* Slight highlight */
+        }
+    
+        /* Message Styles */
+        .message {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    
+        .message.show {
+            display: block;
+            transform: translateY(0); /* Smooth entry */
+        }
+    
+        .success {
+            background: linear-gradient(45deg, #00ddeb, #0077b6); /* Cyan to blue gradient */
+            color: #ffffff;
+        }
+    
+        .error {
+            background: linear-gradient(45deg, #ff4d6d, #d00000); /* Pink to red gradient */
+            color: #ffffff;
+        }
+    
+        /* Form Elements */
+        .submissionForm {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px; /* Space between input and button */
+            align-items: center;
+        }
+    
+        .submissionForm input[type="file"] {
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+    
+        .submissionForm button {
+            padding: 10px 20px;
+            background: #00b4d8; /* Cyan button */
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+    
+        .submissionForm button:hover {
+            background: #0077b6; /* Darker cyan */
+            transform: scale(1.05); /* Slight scale up */
+        }
+    
+        /* Disabled Form and Deadline Passed */
+        .disabled-form {
+            opacity: 0.6; /* More noticeable fade */
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+    
+        .disabled-form button {
+            background: #6c757d; /* Gray for disabled state */
+            cursor: not-allowed;
+        }
+    
+        .deadline-passed {
+            border-left: 6px solid #ff4d6d; /* Pinkish-red for expired */
+        }
+    
+        .deadline-status {
+            color: #ff4d6d; /* Matching pinkish-red */
+            font-style: italic;
+            font-weight: 500;
+            background: rgba(255, 77, 109, 0.15); /* Light pink background */
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    
+        /* Submission Status */
+        .submission-status {
+            color: #00ddeb; /* Bright cyan */
+            font-style: italic;
+            font-weight: 500;
+            background: rgba(0, 219, 235, 0.15); /* Light cyan background */
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+    
+            h1 {
+                font-size: 2rem;
+            }
+    
+            .container {
+                padding: 20px;
+            }
+    
+            li {
+                padding: 15px;
+            }
+    
+            .submissionForm {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+    
+            .message {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>history Assignments</h1> <!-- Added heading for clarity -->
+        <div id="message" class="message"></div>
+        <ul id="assignmentList"><p>no assignments uploaded</p></ul>
+    </div>
+
+    
+</body>
+</html>

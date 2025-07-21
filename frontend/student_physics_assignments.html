@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - Physics Assignments</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background: #28a745;
+            color: white;
+        }
+
+        .error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .disabled-form {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .submission-status {
+            color: #28a745;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Physics Assignments (Student)</h1>
+    <div class="container">
+        <div id="message" class="message"></div>
+        <ul id="assignmentList"><p>Loading...</p></ul>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:5000/api";
+        // Retrieve token and username from localStorage (set by your login page)
+        const token = localStorage.getItem("token");
+        const studentUsername = localStorage.getItem("studentUsername");
+
+        // Redirect to login if no token or username is found
+        if (!token || !studentUsername) {
+            alert("Please log in first!");
+            window.location.href = "/login.html"; // Adjust to your login page URL
+            throw new Error("No token or username found");
+        }
+
+        // Fetch assignments and check for existing submissions
+        async function fetchAssignments() {
+            try {
+                console.log("Fetching assignments from:", `${API_BASE_URL}/assignments/physics`);
+                const response = await fetch(`${API_BASE_URL}/assignments/physics`, {
+                    headers: {
+                        "Authorization": token // Include token if this endpoint requires authentication
+                    }
+                });
+                if (!response.ok) throw new Error("Failed to fetch assignments");
+                const assignments = await response.json();
+                console.log("Fetched assignments:", assignments);
+
+                const assignmentList = document.getElementById("assignmentList");
+                assignmentList.innerHTML = "";
+                if (assignments.length === 0) {
+                    assignmentList.innerHTML = "<p>No assignments posted</p>";
+                    return;
+                }
+
+                assignments.reverse().forEach(assignment => {
+                    const li = document.createElement("li");
+                    const hasSubmitted = assignment.submissions.some(sub => sub.studentUsername === studentUsername);
+
+                    li.innerHTML = `
+                        <strong>${assignment.title}</strong>
+                        <p>${assignment.description}</p>
+                        <p>Deadline: ${new Date(assignment.deadline).toLocaleDateString()}</p>
+                        ${hasSubmitted ? '<p class="submission-status">Status: Already submitted</p>' : ''}
+                        <form class="submissionForm ${hasSubmitted ? 'disabled-form' : ''}" data-assignment-id="${assignment._id}" ${hasSubmitted ? 'disabled' : ''}>
+                            <input type="file" name="file" required ${hasSubmitted ? 'disabled' : ''}>
+                            <button type="submit" ${hasSubmitted ? 'disabled' : ''}>Submit Assignment</button>
+                        </form>
+                    `;
+                    assignmentList.appendChild(li);
+                });
+
+                // Add event listeners to submission forms
+                document.querySelectorAll(".submissionForm").forEach(form => {
+                    if (!form.hasAttribute('disabled')) {
+                        form.addEventListener("submit", async function(event) {
+                            event.preventDefault();
+                            const assignmentId = this.getAttribute("data-assignment-id");
+                            const fileInput = this.querySelector('input[type="file"]');
+                            const file = fileInput.files[0];
+                            if (!file) {
+                                showMessage("Please select a file to submit.", "error");
+                                return;
+                            }
+
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            try {
+                                const response = await fetch(`${API_BASE_URL}/assignments/physics/submit/${assignmentId}`, {
+                                    method: "POST",
+                                    headers: {
+                                        "Authorization": token // Send token for authentication
+                                    },
+                                    body: formData
+                                });
+                                const result = await response.json();
+                                console.log("Submission response:", result);
+
+                                if (result.success) {
+                                    showMessage("Assignment submitted successfully!", "success");
+                                    fetchAssignments(); // Refresh the list
+                                } else {
+                                    showMessage(result.message || "Failed to submit assignment", "error");
+                                }
+                            } catch (error) {
+                                console.error("Error submitting assignment:", error);
+                                showMessage("Error submitting assignment: " + error.message, "error");
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching assignments:", error);
+                const assignmentList = document.getElementById("assignmentList");
+                assignmentList.innerHTML = "<p>Error loading assignments</p>";
+            }
+        }
+
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById("message");
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = "block";
+            setTimeout(() => {
+                messageDiv.style.display = "none";
+            }, 3000);
+        }
+
+        // Initial fetch of assignments
+        fetchAssignments();
+    </script>
+</body>
+</html>

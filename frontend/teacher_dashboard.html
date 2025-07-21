@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #e8eef4 0%, #f7fafc 100%); /* Soft blue-white gradient */
+            color: #2c3e50; /* Dark slate */
+            min-height: 100vh;
+        }
+    
+        h1 {
+            text-align: center;
+            color: #1a3552; /* Deep blue-gray */
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(173, 216, 230, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+    
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+    
+        /* Dashboard Sections */
+        .dashboard-sections {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+    
+        /* Profile Section */
+        .profile-section {
+            flex: 1;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border-left: 5px solid #3498db;
+        }
+    
+        .profile-section h2 {
+            color: #1a3552;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+    
+        .profile-info p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+    
+        .logout-btn {
+            width: 100px;
+            padding: 8px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b); /* Red gradient for logout */
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 15px;
+        }
+    
+        .logout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+    
+        /* Plagiarism Check Button */
+        .plagiarism-btn {
+            width: 150px;
+            padding: 8px;
+            background: linear-gradient(45deg, #067ef7, #5f8797); /* Dodger blue to sky blue */
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 10px; /* Space above the button */
+        }
+    
+        .plagiarism-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(30, 144, 255, 0.4); /* Dodger blue shadow */
+        }
+    
+        /* Subjects Section */
+        .subjects-section {
+            flex: 2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+    
+        .dropdown {
+            position: relative;
+        }
+    
+        .dropbtn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #3498db, #2980b9); /* Blue gradient */
+            color: #ffffff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .dropbtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+    
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            min-width: 180px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            z-index: 1;
+            margin-top: 5px;
+        }
+    
+        .dropdown-content a {
+            color: #2c3e50;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 13px;
+            transition: background 0.3s ease;
+        }
+    
+        .dropdown-content a:hover {
+            background: rgba(52, 152, 219, 0.2);
+        }
+    
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    
+        /* Admin Actions */
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+    
+        .admin-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #2ecc71, #27ae60); /* Green gradient */
+            color: #ffffff;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .admin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+        }
+    
+        /* Events Section */
+        .events-section {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border-left: 5px solid #3498db;
+        }
+    
+        .events-section h2 {
+            color: #1a3552;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+    
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+    
+        .event-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #2980b9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .event-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+    
+        .event-item h3 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            color: #3498db;
+        }
+    
+        .event-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teacher Dashboard</h1>
+    <div class="container">
+        <div class="dashboard-sections">
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <h2>Teacher Profile</h2>
+                <div class="profile-info" id="profile-info">
+                    <p id="teacher-name">Name: Loading...</p>
+                    <p id="teacher-email">Email: Loading...</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Subjects Section -->
+            <div class="subjects-section">
+                <div class="dropdown">
+                    <button class="dropbtn">Maths</button>
+                    <div class="dropdown-content">
+                        <a href="maths_assignment.html">Post Assignment</a>
+                        <a href="view_maths_assignments.html">View Assignments</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="dropbtn">Science</button>
+                    <div class="dropdown-content">
+                        <a href="science_assignment.html">Post Assignment</a>
+                        <a href="#">View Assignments</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="dropbtn">English</button>
+                    <div class="dropdown-content">
+                        <a href="english_assignment.html">Post Assignment</a>
+                        <a href="#">View Assignments</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="dropbtn">History</button>
+                    <div class="dropdown-content">
+                        <a href="history_assignment.html">Post Assignment</a>
+                        <a href="#">View Assignments</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Actions -->
+        <div class="admin-actions">
+            <a href="approve_requests.html" class="admin-btn">Approve Requests</a>
+            <a href="http://127.0.0.1:5000/" class="admin-btn">Check Plagiarism</a> <!-- Updated redirect -->
+            <a href="grade_submissions.html" class="admin-btn">Grade Submissions</a>
+        </div>
+
+        <!-- Events Section -->
+        <div class="events-section">
+            <h2>Upcoming Events</h2>
+            <div class="events-list">
+                <div class="event-item">
+                    <h3>Faculty Meeting</h3>
+                    <p>Date: March 21, 2025 | Time: 10:00 AM - 11:00 AM</p>
+                </div>
+                <div class="event-item">
+                    <h3>Parent-Teacher Conference</h3>
+                    <p>Date: March 23, 2025 | Time: 2:00 PM - 5:00 PM</p>
+                </div>
+                <div class="event-item">
+                    <h3>Science Fair Judging</h3>
+                    <p>Date: March 25, 2025 | Time: 1:00 PM - 3:00 PM</p>
+                </div>
+                <div class="event-item">
+                    <h3>History Seminar</h3>
+                    <p>Date: March 27, 2025 | Time: 11:00 AM - 12:30 PM</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to load teacher details from localStorage
+        function loadTeacherDetails() {
+            const name = localStorage.getItem("teacherName");
+            const email = localStorage.getItem("teacherEmail");
+
+            // Check if details exist, otherwise use defaults
+            document.getElementById("teacher-name").textContent = `Name: ${name || "Unknown Teacher"}`;
+            document.getElementById("teacher-email").textContent = `Email: ${email || "Not provided"}`;
+        }
+
+        // Logout function
+        function logout() {
+            // Clear localStorage
+            localStorage.removeItem("teacherName");
+            localStorage.removeItem("teacherEmail");
+            localStorage.removeItem("teacherId");
+            localStorage.removeItem("teacherToken"); // Assuming a token for auth
+            alert("Logging out...");
+            window.location.href = "teacher_login.html"; // Redirect to login page
+        }
+
+        // Load teacher details when the page loads
+        window.onload = function() {
+            loadTeacherDetails();
+        };
+    </script>
+</body>
+</html>

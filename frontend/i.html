@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Login or Register</title>
+    <style>
+        body {
+            font-family: 'Roboto', 'Helvetica', sans-serif;
+            background: url("success-idea-concept_670147-47682.avif") no-repeat center center fixed;
+            background-size: cover; /* Ensures the image covers the entire background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.5); /* Adjusted to 50% opacity for more transparency */
+            padding: 40px;
+            border-radius: 50%; /* Circular container */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Darker shadow for black bg */
+            text-align: center;
+            width: 350px;
+            height: 350px; /* Fixed height for circle */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            animation: popUp 0.5s ease-out forwards; /* Pop-up animation */
+        }
+        
+        /* Pop-up animation */
+        @keyframes popUp {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        h1 {
+            color: #264653; /* Dark teal for contrast */
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        p {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .btn {
+            display: inline-block;
+            width: 140px; /* Fixed width from pattern */
+            padding: 12px;
+            margin: 10px 0;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 50px; /* Rounded to match pattern */
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); /* Darker shadow */
+        }
+        
+        .btn-login {
+            background: linear-gradient(45deg, #2a9d8f, #8ab17d); /* Nature-inspired green */
+            box-shadow: 0 4px 12px rgba(42, 157, 143, 0.3);
+        }
+        
+        .btn-register {
+            background: linear-gradient(45deg, #e76f51, #f4a261); /* Earthy orange tones */
+            box-shadow: 0 4px 12px rgba(231, 111, 81, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <p>Please choose an option:</p>
+        <a href="student_login.html" class="btn btn-login">Login</a>
+        <a href="student_register.html" class="btn btn-register">Register</a>
+    </div>
+</body>
+</html>

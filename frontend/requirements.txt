@@ -1,0 +1,8 @@
+Flask
+numpy
+pandas
+python-docx
+scikit-learn
+sentence-transformers
+nltk
+werkzeug

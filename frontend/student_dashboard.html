@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #020d0f; /* Dark base */
+            background-image: radial-gradient(
+                circle at 20% 30%,
+                rgba(173, 216, 230, 0.3) 0%, /* Light blue */
+                rgba(173, 216, 230, 0) 50%
+            ), radial-gradient(
+                circle at 80% 70%,
+                rgba(135, 206, 235, 0.3) 0%, /* Sky blue */
+                rgba(95, 148, 169, 0) 50%
+            ); /* Subtle blue wave pattern */
+            color: #080d1a; /* Dark blue for text */
+        }
+
+        .dashboard-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            gap: 20px;
+            min-height: 80vh;
+            flex-direction: column; /* Stack notification bar above main content */
+        }
+
+        /* Notification Bar */
+        .notification-bar {
+            background: rgba(145, 193, 236, 0.9); /* Matches alice blue theme */
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .notification-bar h2 {
+            color: #1e90ff; /* Dodger blue to match theme */
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .notification-bar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .notification-bar li {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border-left: 4px solid #1e90ff; /* Dodger blue accent */
+            font-size: 14px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .notification-bar li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2);
+        }
+
+        .notification-bar li.warning {
+            border-left: 4px solid #ff4d6d; /* Pinkish-red for urgency */
+            background: rgba(255, 77, 109, 0.2); /* Light pink background */
+        }
+
+        /* Main Content Container */
+        .main-content {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            flex: 1;
+            background: rgba(145, 193, 236, 0.9); /* Alice blue */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: popUp 0.5s ease-out forwards;
+        }
+
+        .calendar-section h2 {
+            color: #0e1115; /* Dodger blue */
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .calendar {
+            background: #fbf9f9cc;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-header span {
+            font-weight: 600;
+            color: #4682b4; /* Steel blue */
+            cursor: pointer; /* Indicate clickable arrows */
+        }
+
+        .calendar-header span:hover {
+            color: #1e90ff; /* Dodger blue on hover */
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .calendar-grid div {
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .calendar-grid .day-name {
+            color: #4682b4; /* Steel blue */
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .calendar-grid .day {
+            color: #1e3a8a; /* Dark blue */
+        }
+
+        .calendar-grid .day:hover {
+            background: rgba(30, 144, 255, 0.2); /* Light dodger blue */
+            cursor: pointer;
+        }
+
+        .calendar-grid .today {
+            background: #1e90ff; /* Dodger blue */
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .calendar-grid .inactive {
+            color: #87ceeb; /* Sky blue */
+        }
+
+        /* Right Section */
+        .right-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .profile-section, .subjects-section {
+            background: rgba(145, 193, 236, 0.9); /* Alice blue */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: popUp 0.5s ease-out forwards;
+        }
+
+        .profile-section h2 {
+            color: #0e0f11; /* Dodger blue */
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subjects-section h2 {
+            color: #4682b4; /* Steel blue */
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .profile-info {
+            font-size: 14px;
+            margin-bottom: 15px; /* Space for logout button */
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            width: 100px;
+            padding: 8px;
+            background: linear-gradient(45deg, #067ef7, #5f8797); /* Dodger blue to sky blue */
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(30, 144, 255, 0.4); /* Dodger blue shadow */
+        }
+
+        /* Plagiarism Check Button */
+        .plagiarism-btn {
+            width: 150px;
+            padding: 8px;
+            background: linear-gradient(45deg, #067ef7, #5f8797); /* Dodger blue to sky blue */
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 10px; /* Space above the button */
+        }
+
+        .plagiarism-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(30, 144, 255, 0.4); /* Dodger blue shadow */
+        }
+
+        /* Subjects Section - Horizontal Alignment */
+        .subjects-section .dropdown-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropbtn {
+            width: 150px;
+            padding: 10px;
+            background: linear-gradient(45deg, #067ef7, #5f8797); /* Dodger blue to sky blue */
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dropbtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(30, 144, 255, 0.4); /* Dodger blue shadow */
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            min-width: 150px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: #1e3a8a; /* Dark blue */
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+            font-size: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background: rgba(135, 206, 235, 0.2); /* Sky blue hover */
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Events Section */
+        .events-section {
+            max-width: 1200px;
+            margin: 0 auto 40px; /* Margin bottom for spacing */
+            padding: 20px;
+            background: rgba(145, 193, 236, 0.9); /* Alice blue */
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: popUp 0.5s ease-out forwards;
+        }
+
+        .events-section h2 {
+            color: #0e1114; /* Dodger blue */
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .event-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #1e90ff; /* Dodger blue accent */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .event-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2);
+        }
+
+        .event-item h3 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            color: #4682b4; /* Steel blue */
+        }
+
+        .event-item p {
+            margin: 0;
+            font-size: 14px;
+            color: #1e3a8a; /* Dark blue */
+        }
+
+        /* Animation */
+        @keyframes popUp {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Notification Bar -->
+        <div class="notification-bar">
+            <h2>Assignment Deadlines</h2>
+            <ul id="notificationList">
+                <li>Loading notifications...</li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <h2>Calendar</h2>
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <span id="prevMonth"><</span>
+                        <span id="currentMonthYear"></span>
+                        <span id="nextMonth">></span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Day Names -->
+                        <div class="day-name">Sun</div>
+                        <div class="day-name">Mon</div>
+                        <div class="day-name">Tue</div>
+                        <div class="day-name">Wed</div>
+                        <div class="day-name">Thu</div>
+                        <div class="day-name">Fri</div>
+                        <div class="day-name">Sat</div>
+                        <!-- Days will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Section -->
+            <div class="right-section">
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <h2>Student Profile</h2>
+                    <div class="profile-info" id="profile-info">
+                        <p id="profile-username">Username: Loading...</p>
+                        <p id="profile-email">Email: Loading...</p>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                    <button class="plagiarism-btn" onclick="window.location.href='http://127.0.0.1:5000/'">Check Plagiarism</button>
+                </div>
+
+                <div class="subjects-section">
+                    <h2>Subjects</h2>
+                    <div class="dropdown-container">
+                        <div class="dropdown">
+                            <button class="dropbtn">Maths</button>
+                            <div class="dropdown-content">
+                                <a href="student_assignments.html">Assignments</a>
+                                <a href="#">Course Materials</a>
+                                <a href="#">Quiz</a>
+                                <a href="#">Feedback</a>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="dropbtn">Science</button>
+                            <div class="dropdown-content">
+                                <a href="student_science_assignments.html">Assignments</a>
+                                <a href="#">Course Materials</a>
+                                <a href="#">Quiz</a>
+                                <a href="#">Feedback</a>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="dropbtn">English</button>
+                            <div class="dropdown-content">
+                                <a href="student_english_assignments.html">Assignments</a>
+                                <a href="#">Course Materials</a>
+                                <a href="#">Quiz</a>
+                                <a href="#">Feedback</a>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="dropbtn">History</button>
+                            <div class="dropdown-content">
+                                <a href="student_history_assignments.html">Assignments</a>
+                                <a href="#">Course Materials</a>
+                                <a href="#">Quiz</a>
+                                <a href="#">Feedback</a>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="dropbtn">Geography</button>
+                            <div class="dropdown-content">
+                                <a href="student_geography_assignments.html">Assignments</a>
+                                <a href="#">Course Materials</a>
+                                <a href="#">Quiz</a>
+                                <a href="#">Feedback</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <div class="events-section">
+        <h2>Upcoming Events</h2>
+        <div class="events-list">
+            <div class="event-item">
+                <h3>Maths Workshop</h3>
+                <p>Date: March 20, 2025 | Time: 10:00 AM - 12:00 PM</p>
+            </div>
+            <div class="event-item">
+                <h3>Science Fair</h3>
+                <p>Date: March 22, 2025 | Time: 1:00 PM - 4:00 PM</p>
+            </div>
+            <div class="event-item">
+                <h3>English Debate</h3>
+                <p>Date: March 25, 2025 | Time: 2:00 PM - 3:30 PM</p>
+            </div>
+            <div class="event-item">
+                <h3>History Lecture Series</h3>
+                <p>Date: March 28, 2025 | Time: 11:00 AM - 1:00 PM</p>
+            </div>
+            <div class="event-item">
+                <h3>Geography Field Trip</h3>
+                <p>Date: April 1, 2025 | Time: 9:00 AM - 3:00 PM</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:5000/api";
+        const studentUsername = localStorage.getItem("studentUsername") || "guest";
+
+        // Redirect to login if not authenticated
+        if (studentUsername === "guest") {
+            console.warn("No logged-in user found. Redirecting to login.");
+            window.location.href = "student_login.html";
+        } else {
+            console.log("Current student:", studentUsername);
+        }
+
+        // Function to populate profile details
+        function loadProfileDetails() {
+            const username = localStorage.getItem("studentUsername");
+            const email = localStorage.getItem("studentEmail");
+            document.getElementById("profile-username").textContent = `Username: ${username || "Unknown"}`;
+            document.getElementById("profile-email").textContent = `Email: ${email || "Not provided"}`;
+        }
+
+        // Fetch and display upcoming assignment deadlines
+        async function fetchNotifications() {
+            const notificationList = document.getElementById("notificationList");
+            try {
+                console.log("Fetching notifications for:", studentUsername);
+                console.log("Request URL:", `${API_BASE_URL}/students/assignments?username=${studentUsername}`);
+                const response = await fetch(`${API_BASE_URL}/students/assignments?username=${studentUsername}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                console.log("Response status:", response.status);
+                console.log("Response headers:", [...response.headers.entries()]);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log("Error response body:", errorText);
+                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+                }
+                const assignments = await response.json();
+                console.log("Fetched assignments:", assignments);
+                notificationList.innerHTML = "";
+                if (!Array.isArray(assignments) || assignments.length === 0) {
+                    notificationList.innerHTML = "<li>No upcoming assignments found.</li>";
+                    return;
+                }
+                const now = Date.now();
+                const oneDayInMs = 24 * 60 * 60 * 1000;
+                const upcomingAssignments = assignments.filter(assignment => {
+                    const deadline = new Date(assignment.deadline).getTime();
+                    const hasSubmitted = assignment.submissions.some(sub => sub.studentUsername === studentUsername);
+                    return !hasSubmitted && deadline > now && (deadline - now) <= oneDayInMs;
+                });
+                if (upcomingAssignments.length === 0) {
+                    notificationList.innerHTML = "<li>No deadlines within the next 24 hours.</li>";
+                } else {
+                    upcomingAssignments.forEach(assignment => {
+                        const timeLeft = new Date(assignment.deadline).getTime() - now;
+                        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const li = document.createElement("li");
+                        const subjectLower = assignment.subject.toLowerCase();
+                        const assignmentLink = subjectLower === "mathematics" ? "student_assignments.html" : `student_${subjectLower}_assignments.html`;
+                        li.innerHTML = `<a href="${assignmentLink}" style="color: #1e3a8a; text-decoration: none;">${assignment.title} (${assignment.subject}) - Due in ${hoursLeft}h ${minutesLeft}m</a>`;
+                        li.className = hoursLeft < 6 ? "warning" : "";
+                        li.addEventListener("mouseover", () => li.querySelector("a").style.textDecoration = "underline");
+                        li.addEventListener("mouseout", () => li.querySelector("a").style.textDecoration = "none");
+                        notificationList.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+                notificationList.innerHTML = `<li>Error loading notifications: ${error.message}</li>`;
+            }
+        }
+
+        // Calendar Logic
+        function renderCalendar() {
+            const calendarGrid = document.getElementById("calendarGrid");
+            const currentMonthYear = document.getElementById("currentMonthYear");
+            const today = new Date(); // Current date (e.g., March 19, 2025)
+            let currentDate = new Date(today);
+
+            // Function to update the calendar
+            function updateCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth(); // 0-11
+                const firstDay = new Date(year, month, 1).getDay(); // Day of week (0=Sun, 6=Sat)
+                const daysInMonth = new Date(year, month + 1, 0).getDate(); // Last day of month
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+
+                // Update header
+                currentMonthYear.textContent = `${monthNames[month]} ${year}`;
+
+                // Clear grid except day names
+                while (calendarGrid.children.length > 7) {
+                    calendarGrid.removeChild(calendarGrid.lastChild);
+                }
+
+                // Add empty days before the 1st
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDiv = document.createElement("div");
+                    emptyDiv.className = "day inactive";
+                    calendarGrid.appendChild(emptyDiv);
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement("div");
+                    dayDiv.textContent = day;
+                    dayDiv.className = "day";
+                    if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                        dayDiv.className += " today";
+                    }
+                    calendarGrid.appendChild(dayDiv);
+                }
+            }
+
+            // Initial render
+            updateCalendar();
+
+            // Navigation
+            document.getElementById("prevMonth").onclick = () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar();
+            };
+            document.getElementById("nextMonth").onclick = () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar();
+            };
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem("studentUsername");
+            localStorage.removeItem("studentToken");
+            localStorage.removeItem("studentEmail");
+            window.location.href = "student_login.html";
+        }
+
+        // Load profile, notifications, and calendar when the page loads
+        window.onload = function() {
+            loadProfileDetails();
+            fetchNotifications();
+            renderCalendar();
+        };
+    </script>
+</body>
+</html>

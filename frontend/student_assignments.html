@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student - Maths Assignments</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #1e1e2f 0%, #3b3b58 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+    
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+    
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+    
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+    
+        /* List Styles */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+    
+        li {
+            background: rgba(255, 255, 255, 0.05);
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #00b4d8;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+    
+        li:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+        }
+    
+        /* Form Elements */
+        .submissionForm {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+    
+        .submissionForm input[type="file"] {
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+    
+        .submissionForm button[type="submit"] {
+            padding: 10px 20px;
+            background: #00b4d8;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+    
+        .submissionForm button[type="submit"]:hover {
+            background: #0077b6;
+            transform: scale(1.05);
+        }
+
+        .submissionForm button.plagiarism-btn {
+            padding: 10px 20px;
+            background: #ff6f61;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .submissionForm button.plagiarism-btn:hover {
+            background: #e65a50;
+            transform: scale(1.05);
+        }
+    
+        /* Disabled Form and Deadline Passed */
+        .disabled-form {
+            opacity: 0.6;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+    
+        .disabled-form button {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+    
+        .deadline-passed {
+            border-left: 6px solid #ff4d6d;
+        }
+    
+        .deadline-status {
+            color: #ff4d6d;
+            font-style: italic;
+            font-weight: 500;
+            background: rgba(255, 77, 109, 0.15);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    
+        .submission-status {
+            color: #00ddeb;
+            font-style: italic;
+            font-weight: 500;
+            background: rgba(0, 219, 235, 0.15);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+    
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            color: #e0e0e0;
+            position: relative;
+        }
+
+        .modal-content.success {
+            border-left: 6px solid #00ddeb;
+        }
+
+        .modal-content.error {
+            border-left: 6px solid #ff4d6d;
+        }
+
+        .modal-content h2 {
+            margin: 0 0 15px;
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .modal-content p {
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: #e0e0e0;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #ff6f61;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+    
+            h1 {
+                font-size: 2rem;
+            }
+    
+            .container {
+                padding: 20px;
+            }
+    
+            li {
+                padding: 15px;
+            }
+    
+            .submissionForm {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+    
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Maths Assignments</h1>
+        <ul id="assignmentList"><p>Loading...</p></ul>
+    </div>
+
+    <!-- Modal for Plagiarism Results -->
+    <div id="plagiarismModal" class="modal">
+        <div id="modalContent" class="modal-content">
+            <button id="modalClose" class="modal-close">&times;</button>
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:5000/api";
+        const studentUsername = localStorage.getItem("studentUsername") || "guest";
+
+        // Redirect to login if not authenticated
+        if (studentUsername === "guest") {
+            console.warn("No logged-in user found. Redirecting to login.");
+            window.location.href = "/student_login.html";
+        } else {
+            console.log("Current student:", studentUsername);
+        }
+
+        async function fetchAssignments() {
+            try {
+                console.log("Fetching assignments for:", studentUsername);
+                const response = await fetch(`${API_BASE_URL}/assignments/maths`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const assignments = await response.json();
+                console.log("Fetched assignments:", assignments);
+
+                const assignmentList = document.getElementById("assignmentList");
+                assignmentList.innerHTML = "";
+                if (!Array.isArray(assignments) || assignments.length === 0) {
+                    assignmentList.innerHTML = "<p>No assignments posted</p>";
+                    return;
+                }
+
+                assignments.reverse().forEach(assignment => {
+                    const hasSubmitted = assignment.submissions.some(sub => sub.studentUsername === studentUsername);
+                    const deadlinePassed = new Date(assignment.deadline).getTime() < Date.now();
+                    console.log(`Assignment ${assignment._id}: hasSubmitted = ${hasSubmitted}, deadlinePassed = ${deadlinePassed}`);
+
+                    const li = document.createElement("li");
+                    li.className = deadlinePassed ? "deadline-passed" : "";
+                    li.innerHTML = `
+                        <strong>${assignment.title}</strong>
+                        <p>${assignment.description}</p>
+                        <p>Deadline: ${new Date(assignment.deadline).toLocaleString()}</p>
+                        ${hasSubmitted ? '<p class="submission-status">Status: Already submitted</p>' : ''}
+                        ${deadlinePassed && !hasSubmitted ? '<p class="deadline-status">Status: Deadline Passed</p>' : ''}
+                        <form class="submissionForm ${hasSubmitted || deadlinePassed ? 'disabled-form' : ''}" data-assignment-id="${assignment._id}" ${hasSubmitted || deadlinePassed ? 'disabled' : ''}>
+                            <input type="file" name="file" required ${hasSubmitted || deadlinePassed ? 'disabled' : ''}>
+                            <button type="submit" ${hasSubmitted || deadlinePassed ? 'disabled' : ''}>Submit Assignment</button>
+                            <button type="button" class="plagiarism-btn" ${hasSubmitted || deadlinePassed ? 'disabled' : ''}>Check Plagiarism</button>
+                        </form>
+                    `;
+                    assignmentList.appendChild(li);
+                });
+
+                // Handle assignment submission
+                document.querySelectorAll(".submissionForm").forEach(form => {
+                    if (!form.hasAttribute('disabled')) {
+                        form.addEventListener("submit", async function(event) {
+                            event.preventDefault();
+                            const assignmentId = this.getAttribute("data-assignment-id");
+                            const fileInput = this.querySelector('input[type="file"]');
+                            const file = fileInput.files[0];
+                            if (!file) {
+                                showModal("Error", "Please select a file to submit.", "error");
+                                return;
+                            }
+
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            formData.append("studentUsername", studentUsername);
+
+                            try {
+                                console.log("Submitting assignment:", assignmentId, "as", studentUsername);
+                                const response = await fetch(`${API_BASE_URL}/assignments/maths/submit/${assignmentId}`, {
+                                    method: "POST",
+                                    body: formData
+                                });
+                                const result = await response.json();
+                                console.log("Submission response:", result);
+
+                                if (result.success) {
+                                    showModal("Success", "Assignment submitted successfully!", "success");
+                                    fetchAssignments(); // Refresh the list
+                                } else {
+                                    showModal("Error", result.message || "Failed to submit assignment", "error");
+                                }
+                            } catch (error) {
+                                console.error("Error submitting assignment:", error);
+                                showModal("Error", "Error submitting assignment: " + error.message, "error");
+                            }
+                        });
+
+                        // Handle plagiarism check
+                        const plagiarismBtn = form.querySelector('.plagiarism-btn');
+                        plagiarismBtn.addEventListener("click", async function() {
+                            const fileInput = form.querySelector('input[type="file"]');
+                            const file = fileInput.files[0];
+                            if (!file) {
+                                showModal("Error", "Please select a file to check for plagiarism.", "error");
+                                return;
+                            }
+
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            try {
+                                console.log("Checking plagiarism for file:", file.name);
+                                const response = await fetch("http://127.0.0.1:5000/check_plagiarism", {
+                                    method: "POST",
+                                    body: formData
+                                });
+                                const result = await response.json();
+                                console.log("Plagiarism check response:", result);
+
+                                if (result.success) {
+                                    const tfidfScore = result.tfidf_score || "N/A";
+                                    const deepScore = result.deep_score || "N/A";
+                                    const message = `TF-IDF Score: ${tfidfScore}%<br>Deep Learning Score: ${deepScore}%`;
+                                    showModal("Plagiarism Results", message, "success");
+                                } else {
+                                    showModal("Error", result.message || "Failed to check plagiarism", "error");
+                                }
+                            } catch (error) {
+                                console.error("Error checking plagiarism:", error);
+                                showModal("Error", "Error checking plagiarism: " + error.message, "error");
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching assignments:", error);
+                document.getElementById("assignmentList").innerHTML = "<p>Error loading assignments: " + error.message + "</p>";
+            }
+        }
+
+        function showModal(title, message, type) {
+            const modal = document.getElementById("plagiarismModal");
+            const modalContent = document.getElementById("modalContent");
+            const modalTitle = document.getElementById("modalTitle");
+            const modalMessage = document.getElementById("modalMessage");
+
+            modalTitle.textContent = title;
+            modalMessage.innerHTML = message; // Use innerHTML to support <br> tags
+            modalContent.className = `modal-content ${type}`;
+            modal.style.display = "flex";
+
+            document.getElementById("modalClose").onclick = () => {
+                modal.style.display = "none";
+            };
+        }
+
+        function logout() {
+            localStorage.removeItem("studentUsername");
+            window.location.href = "/student_login.html";
+        }
+
+        fetchAssignments();
+    </script>
+</body>
+</html>
